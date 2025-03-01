@@ -4,11 +4,11 @@ using AudioAPI;
 
 using LabExtended.API;
 using LabExtended.API.CustomVoice.Profiles;
-
+using LabExtended.API.CustomVoice.Threading;
 using LabExtended.Extensions;
 using NorthwoodLib.Pools;
 using PlayerRoles;
-
+using ScpVoiceChat.Voice.Proximity;
 using VoiceChat;
 using VoiceChat.Networking;
 
@@ -105,32 +105,97 @@ public class ScpVoiceProfile : VoiceProfile
         return false;
     }
 
-    public override VoiceProfileResult Receive(ref VoiceMessage message)
+    public override VoiceProfileResult ReceiveFrom(ref VoiceMessage message)
     {
-        if (IsActive && (SendToProximity || SendToScp))
+        void PacketHandler(ProximityChatPacket packet)
         {
-            if (SendToProximity)
-                Handler?.Send(message.Data, message.DataLength);
-
-            if (SendToScp)
+            Handler.Send(packet.Data, packet.Length, player =>
             {
-                message.Channel = VoiceChatChannel.ScpChat;
+                if (!player) 
+                    return false;
                 
-                foreach (var player in ExPlayer.Players)
+                if (player == Player && !player.Switches.CanHearSelf) 
+                    return false;
+                
+                if ((player.Role.IsSpectator || player.Role.IsOverwatch))
                 {
-                    if (player == Player)
-                        continue;
-                    
-                    if (!player.Role.IsScp)
-                        continue;
-                    
-                    player.Send(message);
-                }    
-            }
-            
-            return VoiceProfileResult.SkipAndDontSend;
+                    var spectatedPlayer = player.SpectatedPlayer;
+
+                    if (spectatedPlayer != null)
+                    {
+                        if (spectatedPlayer == Player)
+                            return true;
+                        
+                        if (spectatedPlayer.Position.DistanceTo(Player) <= ScpVoiceConfig.Instance.MaxSpeakerDistance)
+                            return true;
+                    }
+
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        ProximityChatPacket PacketFactory()
+        {
+            var packet = new ProximityChatPacket();
+
+            packet.Volume = ScpVoiceConfig.Instance.VolumeMultiplier;
+            return packet;
         }
         
+        if (SendToProximity && ScpVoiceConfig.Instance.VolumeMultiplier != 1)
+        {
+            if (SendToScp)
+            {
+                for (int i = 0; i < ExPlayer.Players.Count; i++)
+                {
+                    var player = ExPlayer.Players[i];
+
+                    if (!player || !player.Role.IsScp)
+                        continue;
+
+                    if (player == Player && !player.Switches.CanHearSelf)
+                        continue;
+
+                    player.Send(message);
+                }
+            }
+            
+            Player.Voice.Thread.ProcessCustom(message.Data, message.DataLength, ProximityChatProcessor.Instance, PacketHandler, PacketFactory);
+            return VoiceProfileResult.SkipAndDontSend;
+        }
+
         return VoiceProfileResult.None;
+    }
+
+    public override VoiceProfileResult SendTo(ref VoiceMessage message, ExPlayer player)
+    {
+        if (player == Player && !player.Switches.CanHearSelf)
+            return VoiceProfileResult.SkipAndDontSend;
+
+        var isHandled = false;
+        
+        if (SendToProximity)
+        {
+            if (ScpVoiceConfig.Instance.VolumeMultiplier == 1)
+            {
+                Handler.Send(player, message.Data, message.DataLength);
+
+                isHandled = true;
+            }
+        }
+
+        if (SendToScp)
+        {
+            message.Channel = VoiceChatChannel.ScpChat;
+            
+            player.Send(message);
+
+            isHandled = true;
+        }
+
+        return isHandled ? VoiceProfileResult.SkipAndDontSend : VoiceProfileResult.None;
     }
 }

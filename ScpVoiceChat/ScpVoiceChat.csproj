@@ -90,6 +90,8 @@
         <Compile Include="Settings\ScpVoiceMenu.cs" />
         <Compile Include="Settings\ScpVoiceOffsetSlider.cs" />
         <Compile Include="Settings\ScpVoiceSizeSlider.cs" />
+        <Compile Include="Voice\Proximity\ProximityChatPacket.cs" />
+        <Compile Include="Voice\Proximity\ProximityChatProcessor.cs" />
         <Compile Include="Voice\ScpVoiceProfile.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
