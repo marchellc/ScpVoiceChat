@@ -33,6 +33,6 @@ public class ScpVoiceSizeSlider : SettingsSlider
 
         profile.Settings.Size = Mathf.CeilToInt(newValue);
         
-        ApiLog.Debug("Scp Voice", $"Player &1{Player.Name}&r (&6{Player.UserId}&r) changed their hint size to &1{profile.Settings.Size}&r");
+        ApiLog.Debug("Scp Voice", $"Player &1{Player.Nickname}&r (&6{Player.UserId}&r) changed their hint size to &1{profile.Settings.Size}&r");
     }
 }

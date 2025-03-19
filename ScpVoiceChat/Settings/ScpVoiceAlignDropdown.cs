@@ -25,7 +25,7 @@ public class ScpVoiceAlignDropdown : SettingsDropdown
 
         profile.Settings.Align = (HintAlign)option.Data;
         
-        ApiLog.Debug("Scp Voice", $"Player &1{Player.Name}&r (&6{Player.UserId}&r) changed their hint alignment to &1{profile.Settings.Align}&r");
+        ApiLog.Debug("Scp Voice", $"Player &1{Player.Nickname}&r (&6{Player.UserId}&r) changed their hint alignment to &1{profile.Settings.Align}&r");
     }
 
     private static void BuildDropdown(SettingsDropdown settingsDropdown)
