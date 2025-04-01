@@ -32,6 +32,6 @@ public class ScpVoiceOffsetSlider : SettingsSlider
 
         profile.Settings.VerticalOffset = newValue;
         
-        ApiLog.Debug("Scp Voice", $"Player &1{Player.Name}&r (&6{Player.UserId}&r) changed their vertical offset to &1{profile.Settings.VerticalOffset}&r");
+        ApiLog.Debug("Scp Voice", $"Player &1{Player.Nickname}&r (&6{Player.UserId}&r) changed their vertical offset to &1{profile.Settings.VerticalOffset}&r");
     }
 }

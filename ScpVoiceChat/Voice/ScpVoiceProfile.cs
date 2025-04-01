@@ -114,7 +114,7 @@ public class ScpVoiceProfile : VoiceProfile
                 if (!player) 
                     return false;
                 
-                if (player == Player && !player.Switches.CanHearSelf) 
+                if (player == Player && !player.Toggles.CanHearSelf) 
                     return false;
                 
                 if ((player.Role.IsSpectator || player.Role.IsOverwatch))
@@ -156,7 +156,7 @@ public class ScpVoiceProfile : VoiceProfile
                     if (!player || !player.Role.IsScp)
                         continue;
 
-                    if (player == Player && !player.Switches.CanHearSelf)
+                    if (player == Player && !player.Toggles.CanHearSelf)
                         continue;
 
                     player.Send(message);
@@ -172,7 +172,7 @@ public class ScpVoiceProfile : VoiceProfile
 
     public override VoiceProfileResult SendTo(ref VoiceMessage message, ExPlayer player)
     {
-        if (player == Player && !player.Switches.CanHearSelf)
+        if (player == Player && !player.Toggles.CanHearSelf)
             return VoiceProfileResult.SkipAndDontSend;
 
         var isHandled = false;

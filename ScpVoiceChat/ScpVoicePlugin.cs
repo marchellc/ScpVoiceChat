@@ -40,8 +40,7 @@ namespace ScpVoiceChat
 
         private static void OnPlayerJoined(PlayerJoinedEventArgs ev)
         {
-            if (!ExPlayer.TryGet(ev.Player, out var player))
-                return;
+            ExPlayer player = ev.Player as ExPlayer;
 
             player.Voice.AddProfile<ScpVoiceProfile>(player.Role.IsScp);
             player.AddHintElement<ScpVoiceOverlay>();
