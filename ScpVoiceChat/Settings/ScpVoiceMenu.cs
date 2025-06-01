@@ -20,9 +20,9 @@ public class ScpVoiceMenu : SettingsMenu
     public override void BuildMenu(List<SettingsEntry> settings)
     {
         settings
-            .WithEntry(OffsetSlider)
-            .WithEntry(SizeSlider)
-            .WithEntry(AlignDropdown)
+            //.WithEntry(OffsetSlider)
+            //.WithEntry(SizeSlider)
+            //.WithEntry(AlignDropdown)
             
             .WithEntry(SettingsKeyBind.Create("scpVoiceMenu.bindVoice", 
                 ScpVoiceConfig.Instance.KeyBindLabel,
