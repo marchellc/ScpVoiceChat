@@ -11,8 +11,8 @@ public class ScpVoiceSizeSlider : SettingsSlider
         ScpVoiceConfig.Instance.SizeSliderLabel,
         10f,
         30f,
-        
-        0f,
+
+         ScpVoiceConfig.Instance.DefaultSettings.Size,
 
         true,
 
@@ -21,7 +21,7 @@ public class ScpVoiceSizeSlider : SettingsSlider
 
         ScpVoiceConfig.Instance.SizeSliderHint)
     {
-        ShouldSyncDrag = false;
+        ShouldSyncDrag = true;
     }
 
     public override void HandleMove(float previousValue, float newValue)

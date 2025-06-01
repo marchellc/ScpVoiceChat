@@ -13,16 +13,16 @@ public class ScpVoiceMenu : SettingsMenu
     public override string CustomId { get; } = "scpVoiceMenu";
     public override string Header => ScpVoiceConfig.Instance.MenuLabel;
 
-    public ScpVoiceSizeSlider SizeSlider { get; } = new ScpVoiceSizeSlider();
-    public ScpVoiceOffsetSlider OffsetSlider { get; } = new ScpVoiceOffsetSlider();
-    public ScpVoiceAlignDropdown AlignDropdown { get; } = new ScpVoiceAlignDropdown();
+    public ScpVoiceSizeSlider SizeSlider => new ScpVoiceSizeSlider();
+    public ScpVoiceOffsetSlider OffsetSlider => new ScpVoiceOffsetSlider();
+    public ScpVoiceAlignDropdown AlignDropdown => new ScpVoiceAlignDropdown();
     
     public override void BuildMenu(List<SettingsEntry> settings)
     {
         settings
-            .WithEntry(OffsetSlider)
-            .WithEntry(SizeSlider)
-            .WithEntry(AlignDropdown)
+            //.WithEntry(OffsetSlider)
+            //.WithEntry(SizeSlider)
+            //.WithEntry(AlignDropdown)
             
             .WithEntry(SettingsKeyBind.Create("scpVoiceMenu.bindVoice", 
                 ScpVoiceConfig.Instance.KeyBindLabel,
