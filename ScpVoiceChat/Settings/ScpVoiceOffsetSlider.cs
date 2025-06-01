@@ -10,17 +10,17 @@ public class ScpVoiceOffsetSlider : SettingsSlider
         ScpVoiceConfig.Instance.OffsetSliderLabel,
         -15f,
         15f,
-        
-        0f,
 
-        true,
+        ScpVoiceConfig.Instance.DefaultSettings.VerticalOffset,
+
+        false,
 
         "0.##",
         "{0}",
 
         ScpVoiceConfig.Instance.OffsetSliderHint)
     {
-        ShouldSyncDrag = false;
+        ShouldSyncDrag = true;
     }
 
     public override void HandleMove(float previousValue, float newValue)
