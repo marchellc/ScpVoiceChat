@@ -68,7 +68,7 @@ namespace ScpVoiceChat
         public float SpeakerVolume { get; set; } = 1f;
 
         [Description("Volume multiplier.")]
-        public int VolumeMultiplier { get; set; } = 20;
+        public float VolumeMultiplier { get; set; } = 4;
 
         [Description("Whether or not to use spatial audio.")]
         public bool UseSpatialAudio { get; set; } = true;
