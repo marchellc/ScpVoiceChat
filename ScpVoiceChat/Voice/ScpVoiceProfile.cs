@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 using AudioAPI;
-
+using LabApi.Features.Wrappers;
 using LabExtended.API;
 using LabExtended.API.CustomVoice.Profiles;
-using LabExtended.API.CustomVoice.Threading;
 using LabExtended.Extensions;
-using NorthwoodLib.Pools;
 using PlayerRoles;
 using ScpVoiceChat.Voice.Proximity;
 using VoiceChat;
@@ -60,13 +57,14 @@ public class ScpVoiceProfile : VoiceProfile
 
         return "SCP";
     }
-    
+
     public override void Start()
     {
         base.Start();
         
         Handler = AudioHandler.GetOrAdd($"{Player.UserId}_ScpVoice");
-        
+        Handler.ParentTransform = Player.Transform;
+
         Handler.AddSpeaker("ScpVoice", x =>
         {
             x.NetworkVolume = ScpVoiceConfig.Instance.SpeakerVolume;
@@ -76,9 +74,10 @@ public class ScpVoiceProfile : VoiceProfile
             
             x.NetworkIsSpatial = ScpVoiceConfig.Instance.UseSpatialAudio;
             x.NetworkIsStatic = false;
+
+            x.transform.parent = Player.Transform;
         });
         
-        Handler.ParentTransform = Player.Transform;
         
         Profiles.Add(Player, this);
     }
@@ -94,14 +93,13 @@ public class ScpVoiceProfile : VoiceProfile
         Handler = null;
     }
 
-    public override bool OnChangingRole(RoleTypeId newRoleType)
+    public override bool EnabledOnRoleChange(RoleTypeId newRoleType)
     {
-        if (newRoleType.IsScp() && !ScpVoiceConfig.Instance.BlacklistedRoles.Contains(newRoleType))
+        if (newRoleType.IsScp(countZombies: true) && !ScpVoiceConfig.Instance.BlacklistedRoles.Contains(newRoleType))
         {
             ResetState();
             return true;
         }
-
         return false;
     }
 
@@ -113,27 +111,11 @@ public class ScpVoiceProfile : VoiceProfile
             {
                 if (!player) 
                     return false;
-                
+
                 if (player == Player && !player.Toggles.CanHearSelf) 
                     return false;
-                
-                if ((player.Role.IsSpectator || player.Role.IsOverwatch))
-                {
-                    var spectatedPlayer = player.SpectatedPlayer;
 
-                    if (spectatedPlayer != null)
-                    {
-                        if (spectatedPlayer == Player)
-                            return true;
-                        
-                        if (spectatedPlayer.Position.DistanceTo(Player) <= ScpVoiceConfig.Instance.MaxSpeakerDistance)
-                            return true;
-                    }
-
-                    return false;
-                }
-
-                return true;
+                return !player.IsSCP || !SendToScp;
             });
         }
 
@@ -145,57 +127,19 @@ public class ScpVoiceProfile : VoiceProfile
             return packet;
         }
         
-        if (SendToProximity && ScpVoiceConfig.Instance.VolumeMultiplier != 1)
-        {
-            if (SendToScp)
-            {
-                for (int i = 0; i < ExPlayer.Players.Count; i++)
-                {
-                    var player = ExPlayer.Players[i];
-
-                    if (!player || !player.Role.IsScp)
-                        continue;
-
-                    if (player == Player && !player.Toggles.CanHearSelf)
-                        continue;
-
-                    player.Send(message);
-                }
-            }
-            
-            Player.Voice.Thread.ProcessCustom(message.Data, message.DataLength, ProximityChatProcessor.Instance, PacketHandler, PacketFactory);
-            return VoiceProfileResult.SkipAndDontSend;
+        if (message.Channel == VoiceChatChannel.Mimicry || Round.IsRoundEnded) {
+            return VoiceProfileResult.None;
         }
 
-        return VoiceProfileResult.None;
-    }
-
-    public override VoiceProfileResult SendTo(ref VoiceMessage message, ExPlayer player)
-    {
-        if (player == Player && !player.Toggles.CanHearSelf)
-            return VoiceProfileResult.SkipAndDontSend;
-
-        var isHandled = false;
-        
         if (SendToProximity)
         {
-            if (ScpVoiceConfig.Instance.VolumeMultiplier == 1)
-            {
-                Handler.Send(player, message.Data, message.DataLength);
-
-                isHandled = true;
-            }
+            Player.Voice.Thread.ProcessCustom(message.Data, message.DataLength, ProximityChatProcessor.Instance, PacketHandler, PacketFactory);
         }
 
-        if (SendToScp)
-        {
-            message.Channel = VoiceChatChannel.ScpChat;
-            
-            player.Send(message);
+        return SendToScp ? VoiceProfileResult.None : VoiceProfileResult.SkipAndDontSend;
+    }
 
-            isHandled = true;
-        }
-
-        return isHandled ? VoiceProfileResult.SkipAndDontSend : VoiceProfileResult.None;
+    public override VoiceProfileResult SendTo(ref VoiceMessage message, ExPlayer player) {
+        return VoiceProfileResult.None;
     }
 }

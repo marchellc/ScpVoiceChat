@@ -4,5 +4,5 @@ namespace ScpVoiceChat.Voice.Proximity;
 
 public class ProximityChatPacket : VoiceThreadPacket
 {
-    public volatile int Volume;
+    public volatile float Volume;
 }
